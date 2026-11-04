@@ -1,0 +1,15 @@
+name: factory-agent-mysql-test
+services:
+  mysql-test:
+    image: mysql:8.0.31
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: test-only-password
+      MYSQL_DATABASE: agent_test_compat
+    ports: ["127.0.0.1:13306:3306"]
+    tmpfs: ["/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ptest-only-password"]
+      interval: 5s
+      timeout: 5s
+      retries: 30

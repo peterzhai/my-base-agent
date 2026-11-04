@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ES2022","lib":["ES2022","DOM","DOM.Iterable"],"module":"ESNext","moduleResolution":"Bundler","jsx":"react-jsx","strict":true,"skipLibCheck":true,"noEmit":true,"allowSyntheticDefaultImports":true,"resolveJsonModule":true,"paths":{"@factory-agent/chat":["../packages/chat/src/index.tsx"]}},"include":["src","vite.config.ts"]}

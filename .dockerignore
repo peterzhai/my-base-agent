@@ -1,0 +1,16 @@
+.venv
+.uv-cache
+.npm-cache
+node_modules
+**/node_modules
+**/dist
+data
+.env
+.git
+__pycache__
+.pytest_cache
+test-results
+playwright-report
+artifacts
+offline-bundle
+*.tar

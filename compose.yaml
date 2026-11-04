@@ -1,0 +1,41 @@
+name: factory-agent
+services:
+  api:
+    image: factory-agent-api:0.1.0
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.api
+    env_file: .env
+    volumes: ["./data:/app/data"]
+    restart: unless-stopped
+    mem_limit: 1800m
+    cpus: 1.5
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      options: {max-size: "10m", max-file: "3"}
+  worker:
+    image: factory-agent-api:0.1.0
+    command: ["python", "-m", "backend.infrastructure.jobs.worker"]
+    env_file: .env
+    volumes: ["./data:/app/data"]
+    restart: unless-stopped
+    mem_limit: 2600m
+    cpus: 1.5
+    depends_on:
+      api: {condition: service_healthy}
+    logging:
+      options: {max-size: "10m", max-file: "3"}
+  web:
+    image: factory-agent-web:0.1.0
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.web
+    ports: ["8080:80"]
+    restart: unless-stopped
+    mem_limit: 128m
+    depends_on:
+      api: {condition: service_healthy}
