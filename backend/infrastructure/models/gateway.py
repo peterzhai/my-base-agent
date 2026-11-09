@@ -56,10 +56,19 @@ class Gateway:
         key = decrypt(self.config["api_key_encrypted"]) if self.config.get("api_key_encrypted") else ""
         return httpx.AsyncClient(
             base_url=self.config["base_url"].rstrip("/") + "/",
-            headers={"Authorization": f"Bearer {key}"},
-            timeout=40,
+            headers={"Authorization": f"Bearer {key}"} if key else {},
+            timeout=float(self.config.get("timeout_seconds", 40)),
             trust_env=False,
         )
+
+    def _chat_options(self) -> dict:
+        """传递显式配置的生成参数，适配本地 Qwen 思考模式而不写死模型特有行为。"""
+        options = self.config.get("chat_options", {})
+        return {
+            key: value
+            for key, value in options.items()
+            if key in {"max_tokens", "reasoning_effort", "chat_template_kwargs"}
+        }
 
     async def complete(self, messages: list[dict], *, structured: bool = False) -> str:
         """执行一次非流式模型调用；可要求 JSON 格式，传输错误采用有限重试，业务层仍需验证输出。
@@ -71,6 +80,8 @@ class Gateway:
                 if self.mock:
                     return self._mock(messages, structured)
                 body = {"model": self.config["chat_model"], "messages": messages, "temperature": 0}
+                # 本地推理服务可显式关闭思考输出；只允许与生成相关的参数，不能覆盖模型、消息或认证。
+                body.update(self._chat_options())
                 if structured:
                     body["response_format"] = {"type": "json_object"}
                 async with self.client() as client:
@@ -114,6 +125,7 @@ class Gateway:
                         "messages": messages,
                         "stream": True,
                         "temperature": 0,
+                        **self._chat_options(),
                     },
                 ) as response:
                     response.raise_for_status()
