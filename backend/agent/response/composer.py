@@ -15,6 +15,7 @@ class ResponseComposer:
     async def answer(self, state):
         """响应策略：生成前和流式过程中均校验权限，统一输出证据及表格。"""
         self.d.check()
+        self.d.events.append(self.d.context.trace_id, "status", {"message": "复核当前权限与证据 → 组织回答"})
         evidence = self.d.validate_evidence(state.get("evidence", []), self.d.context.principal)
         tables = state.get("tables", [])
         for table in tables:

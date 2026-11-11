@@ -33,7 +33,7 @@ uv run uvicorn examples.host_server:app --host 127.0.0.1 --port 8001
 npm run dev
 ```
 
-- 管理后台：<http://127.0.0.1:5173>，开发管理员密码 `development-admin-password`。
+- 管理后台：<http://127.0.0.1:5173>，开发管理员密码 `111111`。
 - 组件接入示例：<http://127.0.0.1:5173/demo>，可切换一、二车间员工验证隔离。
 - API 文档：<http://127.0.0.1:8000/docs>。
 - 示例提问：`MES 如何报工？`、`今天产量是多少？`、`各物料库存是多少？`。

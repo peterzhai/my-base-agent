@@ -10,7 +10,7 @@ folder = Path(tempfile.mkdtemp(prefix="factory-agent-e2e-"))
 os.environ["ENVIRONMENT"] = "development"
 os.environ["DATABASE_URL"] = f"sqlite:///{folder}/platform.db"
 os.environ["DATA_DIR"] = str(folder)
-os.environ["ADMIN_PASSWORD"] = "development-admin-password"
+os.environ["ADMIN_PASSWORD"] = "111111"
 os.environ["SERVICE_KEY"] = "development-service-key"
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 

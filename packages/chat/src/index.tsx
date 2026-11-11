@@ -145,7 +145,16 @@ function ChatInner({
         result.run_id,
         (event) => {
           if (!mounted.current) return;
-          if (event.event === "status") setStatus(event.data.message);
+          if (event.event === "status") {
+            setStatus(event.data.message);
+            update((m) => ({
+              ...m,
+              payload: {
+                ...m.payload,
+                trace: [...(m.payload?.trace ?? []), event.data.message],
+              },
+            }));
+          }
           if (event.event === "reset")
             update((m) => ({ ...m, content: "", payload: {} }));
           if (event.event === "delta")
@@ -295,6 +304,18 @@ function ChatInner({
               <div className="fa-chat-role">
                 {m.role === "user" ? "你" : "智能助手"}
               </div>
+              {m.payload?.trace?.length > 0 && (
+                <details className="fa-chat-trace">
+                  <summary>
+                    查看模块执行过程（{m.payload.trace.length} 步）
+                  </summary>
+                  <ol>
+                    {m.payload.trace.map((step: string, index: number) => (
+                      <li key={index}>{step}</li>
+                    ))}
+                  </ol>
+                </details>
+              )}
               <div className="fa-chat-content">
                 {m.content || (busy ? <Spin size="small" /> : "本次未生成回答")}
               </div>

@@ -1,0 +1,79 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: 后端 API (8000)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "backend.app:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000",
+        "--reload"
+      ],
+      "jinja": true,
+      "justMyCode": false,
+      "cwd": "${workspaceFolder}",
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
+      "python": "${workspaceFolder}/.venv/bin/python"
+    },
+    {
+      "name": "Python: 宿主后端 (8001)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "examples.host_server:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8001",
+        "--reload"
+      ],
+      "jinja": true,
+      "justMyCode": false,
+      "cwd": "${workspaceFolder}",
+      "env": { "PYTHONPATH": "${workspaceFolder}" },
+      "python": "${workspaceFolder}/.venv/bin/python"
+    },
+    {
+      "name": "Web: Vite dev server",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/web",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Chrome: 附加到 Vite (5173)",
+      "type": "chrome",
+      "request": "attach",
+      "url": "http://127.0.0.1:5173",
+      "webRoot": "${workspaceFolder}/web/src"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "前后端联调 (API + Web)",
+      "configurations": [
+        "Python: 后端 API (8000)",
+        "Web: Vite dev server"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "全栈联调 (API + Host + Web)",
+      "configurations": [
+        "Python: 后端 API (8000)",
+        "Python: 宿主后端 (8001)",
+        "Web: Vite dev server"
+      ],
+      "stopAll": true
+    }
+  ]
+}

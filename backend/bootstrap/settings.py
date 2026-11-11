@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     jwt_secret: str = "development-only-change-this-secret-at-least-32"
     encryption_key: str = ""  # Fernet key; required in production
     service_key: str = "development-service-key"
-    admin_password: str = "development-admin-password"
+    admin_password: str = "111111"
     allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     token_minutes: int = 15
     max_upload_mb: int = 20

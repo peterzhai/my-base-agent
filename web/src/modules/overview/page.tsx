@@ -1,7 +1,7 @@
 /** 工作台概览：只聚合可展示的资源数量，不承担业务授权与 Agent 决策。 */
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { AgentClient } from "@factory-agent/chat";
-import { Button, Card, Statistic } from "antd";
+import { Alert, Button, Card, Statistic } from "antd";
 import { useEffect, useState } from "react";
 
 export function Overview({
@@ -11,6 +11,7 @@ export function Overview({
   client: AgentClient;
   go: (s: string) => void;
 }) {
+  const [simulation, setSimulation] = useState<boolean | null>(null);
   const [counts, setCounts] = useState([0, 0, 0, 0]);
   useEffect(() => {
     Promise.all(
@@ -18,11 +19,28 @@ export function Overview({
         client.json(`/admin/records/${k}`),
       ),
     )
-      .then((items) => setCounts(items.map((x) => x.length)))
+      .then((items) => {
+        setCounts(items.map((x) => x.length));
+        setSimulation(items[3].some((m: any) => m.config.provider === "mock"));
+      })
       .catch(() => {});
   }, [client]);
   return (
     <>
+      {simulation !== null && (
+        <Alert
+          style={{ marginBottom: 16 }}
+          showIcon
+          type={simulation ? "warning" : "info"}
+          message={
+            simulation
+              ? "当前存在模拟模型配置，演示数据不代表工厂实际业务"
+              : "已配置非模拟模型；请在模型服务页面测试连接"
+          }
+          description="真实接入顺序：模型服务 → 上传真实文档 → 只读数据源 → 业务主题与部门权限。配置数量不等于已验证可用。"
+          action={<Button onClick={() => go("models")}>检查模型配置</Button>}
+        />
+      )}
       <div className="hero">
         <div className="eyebrow">FACTORY INTELLIGENCE / WORKSPACE</div>
         <h1>

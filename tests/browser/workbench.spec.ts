@@ -3,7 +3,7 @@ import {test,expect} from '@playwright/test';
 test('管理工作台、RAG 引用与数据问答',async({page})=>{
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto('/');
-  await page.getByLabel('管理员密码').fill('development-admin-password');
+  await page.getByLabel('管理员密码').fill('111111');
   await page.getByRole('button',{name:'进入工作台'}).click();
   await expect(page.getByRole('heading',{name:/让知识与数据/})).toBeVisible();
   await page.screenshot({path:'test-results/workbench.png',fullPage:true});

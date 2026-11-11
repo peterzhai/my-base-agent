@@ -51,6 +51,23 @@ class IntentRouter:
             raise ValueError("模型返回无效路由")
         if decision.route in {"data", "mixed"} and decision.topic_id not in {t.id for t in topics}:
             decision.route, decision.clarification = "clarify", "没有匹配的授权业务主题，请补充查询对象。"
+        # 公开路由决定而非模型内部思维，帮助用户核对本次到底调用哪些能力。
+        labels = {
+            "knowledge": "知识检索",
+            "data": "业务数据查询",
+            "mixed": "知识与数据组合",
+            "clarify": "补充条件",
+        }
+        order = "先检索口径再查数据" if decision.sequential else "独立任务可并行"
+        self.d.events.append(
+            self.d.context.trace_id,
+            "status",
+            {
+                "message": f"感知完成 → {labels[decision.route]}；{order}"
+                if decision.route == "mixed"
+                else f"感知完成 → {labels[decision.route]}"
+            },
+        )
         return {
             "route": decision.model_dump(),
             "question": decision.question,

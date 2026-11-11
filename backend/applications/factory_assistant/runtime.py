@@ -12,7 +12,7 @@ from backend.infrastructure.identity.security import (
 )
 from backend.infrastructure.models.gateway import agent_gateway
 from backend.infrastructure.persistence.database import Session
-from backend.infrastructure.persistence.entities import Conversation, Message, Run
+from backend.infrastructure.persistence.entities import Conversation, Message, Run, RunEvent
 from backend.infrastructure.persistence.events import SQLRunEvents
 from backend.infrastructure.persistence.history import history_for
 
@@ -77,8 +77,21 @@ async def execute_run(run_id: str, resume: bool = False):
             events.append(run_id, "reset", {})
         async with asyncio.timeout(ctx.timeout_seconds):
             result = await graph.ainvoke(initial, config=config)
+        # 保存已对客户端公开的阶段记录，历史会话也能回看；不保存模型内部推理。
+        from sqlalchemy import select
+
+        with Session() as db:
+            trace = [
+                row.data.get("message", "")
+                for row in db.scalars(
+                    select(RunEvent)
+                    .where(RunEvent.run_id == run_id, RunEvent.event == "status")
+                    .order_by(RunEvent.id)
+                )
+            ]
         output = {
             "scope": scope,
+            "trace": trace,
             "answer": result.get("answer", ""),
             "citations": [
                 {k: v for k, v in item.items() if k != "content"} for item in result.get("evidence", [])
