@@ -1,4 +1,4 @@
-"""Isolated test/demo server; never reads or mutates the developer's platform database."""
+""":mock Isolated test/demo server; never reads or mutates the developer's platform database."""
 
 import asyncio
 import os

@@ -22,6 +22,7 @@ def bootstrap():
         ("departments", "workshop-a", "一车间", {}),
         ("departments", "workshop-b", "二车间", {}),
         ("users", "admin", "平台管理员", {"enabled": True, "department": "workshop-a", "roles": ["admin"]}),
+        # :mock 默认模型为模拟提供者，接入真实模型前仅用于流程验证。
         ("models", "default", "内网模型（待配置）", {"enabled": True, "provider": "mock"}),
         (
             "agents",
@@ -50,13 +51,14 @@ def bootstrap():
 
 
 def seed_demo():
-    """仅开发环境导入合成资料与业务数据，用于验证流程，不能用于生产初始化。"""
+    """:mock 仅开发环境导入合成资料与业务数据，用于验证流程，不能用于生产初始化。"""
     if settings().environment == "production":
         raise ValueError("生产环境不允许自动加载演示业务数据")
     bootstrap()
     path = (settings().data_dir / "business-demo.db").resolve()
     engine = create_engine(f"sqlite:///{path}")
     today = str(datetime.now(ZoneInfo("Asia/Shanghai")).date())
+    # :mock 生成演示产量、库存与车间数据，不代表真实业务记录。
     with engine.begin() as conn:
         conn.execute(
             text(
@@ -101,6 +103,7 @@ def seed_demo():
                 )
             )
     engine.dispose()
+    # :mock 演示用户、身份映射、数据源、查询主题及评测用例。
     acl = {"enabled": True, "roles": ["employee", "admin"], "departments": ["workshop-a", "workshop-b"]}
     values = [
         (
@@ -189,6 +192,7 @@ def seed_demo():
         for kind, ident, name, config in values:
             if not db.get(Record, (kind, ident)):
                 db.add(Record(kind=kind, id=ident, name=name, config=config))
+        # :mock 下方生成合成 MES 手册及其导入任务。
         if not db.query(Document).filter_by(name="MES操作手册.md").first():
             path = (settings().data_dir / "documents" / "demo-manual.md").resolve()
             path.parent.mkdir(exist_ok=True)

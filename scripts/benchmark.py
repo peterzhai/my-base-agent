@@ -27,6 +27,7 @@ async def benchmark(chunks, concurrency, dimension):
 
     Base.metadata.create_all(engine)
     rng = np.random.default_rng(42)
+    # :mock 随机向量及下方合成知识块仅用于容量压测。
     matrix = rng.normal(size=(chunks, dimension)).astype(np.float32)
     matrix /= np.linalg.norm(matrix, axis=1, keepdims=True)
     with Session.begin() as db:
@@ -69,7 +70,7 @@ async def benchmark(chunks, concurrency, dimension):
     build_seconds = time.monotonic() - started
 
     class BenchmarkGateway(Gateway):
-        """容量测试用向量适配器：直接返回固定维度向量，排除真实模型服务耗时。"""
+        """:mock 容量测试用向量适配器：直接返回固定维度向量，排除真实模型服务耗时。"""
 
         def __init__(self):
             """通过构造函数保存本对象依赖；优先注入协作者，避免业务方法自行寻找全局资源。"""

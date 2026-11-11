@@ -1,4 +1,4 @@
-/** 宿主接入示例：从示例后端获取令牌，切换账号时改变 identityKey 以清理旧会话。 */
+/** :mock 宿主接入示例：从示例后端获取令牌，切换账号时改变 identityKey 以清理旧会话。 */
 import { ChatLauncher } from "@factory-agent/chat";
 import { Card, Select, Statistic, Tag } from "antd";
 import { useCallback, useState } from "react";
@@ -27,6 +27,7 @@ export function DemoHost() {
         ]}
         style={{ width: 200 }}
       />
+      {/* :mock 固定展示的班次与系统状态，不读取真实业务数据。 */}
       <div className="stats-grid">
         <Card>
           <Statistic title="当前班次" value="白班" />

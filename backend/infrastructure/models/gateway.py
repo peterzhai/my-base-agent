@@ -78,6 +78,7 @@ class Gateway:
         try:
             async with _limit:
                 if self.mock:
+                    # :mock 使用规则生成模型结果，不调用真实模型。
                     return self._mock(messages, structured)
                 body = {"model": self.config["chat_model"], "messages": messages, "temperature": 0}
                 # 本地推理服务可显式关闭思考输出；只允许与生成相关的参数，不能覆盖模型、消息或认证。
@@ -111,6 +112,7 @@ class Gateway:
         start = time.monotonic()
         try:
             if self.mock:
+                # :mock 将规则生成的回答包装为流式输出。
                 answer = self._mock(messages, False)
                 for offset in range(0, len(answer), 12):
                     await asyncio.sleep(0)
@@ -147,6 +149,7 @@ class Gateway:
 
         texts：待向量化文本批次"""
         if self.mock:
+            # :mock 字符哈希生成确定性向量，不具备真实语义嵌入能力。
             vectors = []
             for text in texts:
                 v = np.zeros(128, dtype=np.float32)
@@ -171,7 +174,7 @@ class Gateway:
                 raise RuntimeError("向量模型服务不可用或响应无效") from None
 
     def _mock(self, messages: list[dict], structured: bool) -> str:
-        """用确定性规则模拟路由、查询计划与回答，仅用于流程测试而不模拟模型智能水平。
+        """:mock 用确定性规则模拟路由、查询计划与回答，仅用于流程测试而不模拟模型智能水平。
 
         messages：有序的模型上下文消息"""
         request = json.loads(messages[-1]["content"])

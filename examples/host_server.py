@@ -15,6 +15,7 @@ app = FastAPI(title="示例宿主后端")
 @app.post("/session/{account}")
 async def session(account: str):
     """只为两个固定开发账号向平台交换令牌；生产宿主应从已认证会话中读取账号。"""
+    # :mock 演示宿主账号白名单，用于模拟已有系统登录身份。
     if account not in {"host-demo-a", "host-demo-b"}:
         raise HTTPException(403, "无效演示用户")
     async with httpx.AsyncClient(trust_env=False) as client:
