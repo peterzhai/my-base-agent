@@ -20,7 +20,7 @@ async def benchmark(chunks, concurrency, dimension):
     import numpy as np
 
     from backend.capabilities.knowledge import KnowledgeRetriever, rebuild_index
-    from backend.core.contracts import Principal
+    from backend.agent.policies.contracts import Principal
     from backend.infrastructure.models.gateway import Gateway
     from backend.infrastructure.persistence.database import Base, Session, engine
     from backend.infrastructure.persistence.entities import Chunk, Document, Record

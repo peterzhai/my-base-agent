@@ -5,11 +5,11 @@ from datetime import timedelta
 import pytest
 from sqlalchemy import select
 
-from backend.infra.db import Session
-from backend.infra.models import Document, Job, Record, now
-from backend.infra.security import principal_for_user
-from backend.services.jobs import claim_job, process_one
-from backend.services.knowledge import KnowledgeRetriever, index_directory, ingest, revalidate_evidence
+from backend.infrastructure.persistence.database import Session
+from backend.infrastructure.persistence.entities import Document, Job, Record, now
+from backend.infrastructure.identity.security import principal_for_user
+from backend.infrastructure.jobs.worker import claim_job, process_one
+from backend.capabilities.knowledge import KnowledgeRetriever, index_directory, ingest, revalidate_evidence
 
 
 @pytest.mark.asyncio
@@ -42,7 +42,7 @@ async def test_index_can_be_rebuilt_from_database_and_deleted_docs_disappear():
 @pytest.mark.asyncio
 async def test_replacement_is_atomic():
     """验证 replacement is atomic 的行为契约；断言失败表示该路径的约束被破坏。"""
-    from backend.config import settings
+    from backend.bootstrap.settings import settings
 
     path = settings().data_dir / "replacement.md"
     path.write_text("新版报工规范：先核对工单再提交。")

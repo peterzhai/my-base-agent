@@ -12,7 +12,7 @@ from pathlib import Path
 
 from sqlalchemy.engine import make_url
 
-from backend.config import settings
+from backend.bootstrap.settings import settings
 
 
 def mysql_command(program):

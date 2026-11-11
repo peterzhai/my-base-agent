@@ -5,8 +5,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from backend.agent.composition import MixedWorkflow
-from backend.agent.knowledge import KnowledgeWorkflow
+from backend.applications.factory_assistant.composition import MixedWorkflow
+from backend.applications.factory_assistant.knowledge_workflow import KnowledgeWorkflow
 
 
 @pytest.mark.asyncio

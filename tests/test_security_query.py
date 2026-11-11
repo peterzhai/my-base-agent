@@ -2,11 +2,11 @@
 
 import pytest
 
-from backend.infra.db import Session
-from backend.infra.models import Record
-from backend.infra.security import allowed, decrypt, principal_for_user
-from backend.services.query import compile_query, execute_readonly
-from backend.services.schemas import QueryPlan, TopicConfig
+from backend.infrastructure.persistence.database import Session
+from backend.infrastructure.persistence.entities import Record
+from backend.infrastructure.identity.security import allowed, decrypt, principal_for_user
+from backend.capabilities.data_query import compile_query, execute_readonly
+from backend.capabilities.data_query.schemas import QueryPlan, TopicConfig
 
 
 def config():

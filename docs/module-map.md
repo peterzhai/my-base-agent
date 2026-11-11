@@ -35,10 +35,7 @@ backend/
 │   ├── dependencies.py            HTTP 身份依赖
 │   └── schemas.py                 HTTP 请求模型
 ├── bootstrap/                     配置、显式初始化、CLI
-├── app.py                         FastAPI 组合入口
-├── core/                          旧集中式协议的兼容转发
-├── infra/                         旧基础设施导入的兼容别名
-└── services/                      旧服务导入的兼容转发
+└── app.py                         FastAPI 组合入口
 
 web/src/
 ├── modules/
@@ -93,34 +90,19 @@ flowchart TD
 | 知识能力 | `capabilities.knowledge` | 明确重导出检索、导入、证据与索引入口 |
 | 查询能力 | `capabilities.data_query` | compile_query、execute_readonly、query_data |
 | 数据实体与会话 | `infrastructure.persistence.entities / database` | 不从旧 infra 导入新代码 |
-| 后台工作者 | `python -m backend.infrastructure.jobs.worker` | 旧 jobs 模块命令暂时兼容 |
+| 后台工作者 | `python -m backend.infrastructure.jobs.worker` | 后台任务进程入口 |
 | 初始化 | `python -m backend.bootstrap` | 命令保持不变，导入 settings 不执行 seed |
 | API | `backend.app:app` | 外部 HTTP 路径和 SSE 类型保持不变 |
 
 表中 Python 路径均以 `backend.` 为前缀。
 
-## 旧路径迁移表
+## 目录边界与入口
 
-| 旧路径 | 唯一实现的新位置 |
-|---|---|
-| backend/core/contracts.py | agent 各模块及 knowledge/contracts.py；原文件只重导出 |
-| backend/infra/db.py、models.py | infrastructure/persistence/database.py、entities.py |
-| backend/infra/checkpoints.py | infrastructure/persistence/checkpoints.py |
-| backend/infra/gateway.py | infrastructure/models/gateway.py |
-| backend/infra/security.py | infrastructure/identity/security.py |
-| backend/services/runtime.py | applications/factory_assistant/runtime.py |
-| backend/services/knowledge.py | capabilities/knowledge/ 内的各文件 |
-| backend/services/query.py | capabilities/data_query/ 内的各文件 |
-| backend/services/jobs.py | infrastructure/jobs/worker.py |
-| backend/services/evaluation.py | applications/factory_assistant/evaluation.py |
-| backend/agent/assembly.py、composition.py | applications/factory_assistant/assembly.py、composition.py |
-| backend/agent/knowledge.py、data.py | applications/factory_assistant/*_workflow.py |
-| backend/agent/dependencies.py | applications/factory_assistant/dependencies.py |
-| backend/agent/perception.py、response.py | agent/perception/router.py、response/composer.py |
-| backend/bootstrap.py、config.py | bootstrap/seeding.py、settings.py |
-| web/src/components/* | web/src/modules/ 中相应模块 |
+旧 core、infra、services、config 及 agent 根级兼容转发已移除；所有调用方使用唯一实现路径。
 
-旧路径仅为兼容层，不再新增真实业务。需要模块别名的入口使用同一 Python module 对象，避免生成两份连接池、运行任务注册表或猴子补丁目标。知识和查询旧入口只重导出同一函数/类，不复制实现。
+- 能力逻辑（检索、查询编译）放 capabilities；技术适配（数据库连接、模型 HTTP 客户端）放 infrastructure。
+- 当前能力层允许依赖基础设施，是模块化单体，不要求严格的端口适配隔离。
+- app.py 是 HTTP 入口；applications/factory_assistant/assembly.py 组装具体依赖；runtime.py 管理运行生命周期；bootstrap 负责配置与初始化。
 
 ## 推荐阅读链路
 
@@ -134,6 +116,6 @@ flowchart TD
 
 ## 验证与边界
 
-`tests/test_module_boundaries.py` 验证：内核不反向依赖应用/基础设施、新代码不使用旧导入、兼容别名对象一致，以及上下文模块可脱离数据库测试。现有问答、权限、图恢复、浏览器等回归测试继续保留。
+`tests/test_module_boundaries.py` 验证：内核不反向依赖应用/基础设施、全仓源码不使用旧导入（包括动态导入与补丁目标），以及上下文模块可脱离数据库测试。现有问答、权限、图恢复、浏览器等回归测试继续保留。
 
 本轮不改变数据库模式，不需要新增迁移。目录迁移没有新增自主规划、长期记忆实现或第二种图引擎。现有离线镜像为旧源码构建，部署本轮代码前需重新打包；镜像不会因为目录变化自动更新。

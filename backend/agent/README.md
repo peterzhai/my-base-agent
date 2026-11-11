@@ -12,14 +12,13 @@
 
 从 policies/contracts.py 的 Principal 和 execution/context.py 的 ExecutionContext 开始。
 
-## 文件清单
+## 模块清单
 
-- `__init__.py`
-- `assembly.py`
-- `composition.py`
-- `data.py`
-- `dependencies.py`
-- `knowledge.py`
+- perception、context、execution：感知、上下文装配与执行控制。
+- tools、models、memory：工具、模型与记忆协议。
+- response、policies：响应组织与权限守卫。
+
+应用组装和业务工作流位于 applications/factory_assistant。
 
 ## 学习要点
 

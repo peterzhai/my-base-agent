@@ -16,10 +16,10 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from backend.app import app  # noqa: E402
 from backend.bootstrap import seed_demo  # noqa: E402
-from backend.infra.db import Base, Session, engine  # noqa: E402
-from backend.infra.models import Record  # noqa: E402
-from backend.infra.security import issue_token  # noqa: E402
-from backend.services.jobs import process_one  # noqa: E402
+from backend.infrastructure.persistence.database import Base, Session, engine  # noqa: E402
+from backend.infrastructure.persistence.entities import Record  # noqa: E402
+from backend.infrastructure.identity.security import issue_token  # noqa: E402
+from backend.infrastructure.jobs.worker import process_one  # noqa: E402
 
 
 @pytest.fixture(autouse=True)

@@ -4,12 +4,12 @@ import asyncio
 
 import pytest
 
-from backend.config import settings
-from backend.core.contracts import ExecutionContext
-from backend.infra.db import Session
-from backend.infra.models import Conversation, Record, Run
-from backend.infra.security import principal_for_user
-from backend.services.runtime import build_graph, execute_run, permission_scope
+from backend.bootstrap.settings import settings
+from backend.agent.execution.context import ExecutionContext
+from backend.infrastructure.persistence.database import Session
+from backend.infrastructure.persistence.entities import Conversation, Record, Run
+from backend.infrastructure.identity.security import principal_for_user
+from backend.applications.factory_assistant.runtime import build_graph, execute_run, permission_scope
 
 
 def conversation(client, headers):
@@ -173,7 +173,7 @@ async def test_checkpoint_resumes_after_route_and_pending_writes():
 @pytest.mark.asyncio
 async def test_cancel_stops_inflight_model(monkeypatch):
     """验证 cancel stops inflight model 的行为契约；断言失败表示该路径的约束被破坏。"""
-    from backend.infra.gateway import Gateway
+    from backend.infrastructure.models.gateway import Gateway
 
     class SlowGateway(Gateway):
         """SlowGateway 的数据或接口边界。字段和方法以本模块职责为限，不承担跨层隐式初始化。"""
@@ -182,7 +182,7 @@ async def test_cancel_stops_inflight_model(monkeypatch):
             """执行一次非流式模型调用；可要求 JSON 格式，传输错误采用有限重试，业务层仍需验证输出。"""
             await asyncio.sleep(30)
 
-    monkeypatch.setattr("backend.services.runtime.agent_gateway", lambda _: SlowGateway())
+    monkeypatch.setattr("backend.applications.factory_assistant.runtime.agent_gateway", lambda _: SlowGateway())
     principal = principal_for_user("demo-a")
     with Session.begin() as db:
         c = Conversation(user_id=principal.user_id)

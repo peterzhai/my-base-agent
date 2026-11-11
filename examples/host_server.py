@@ -5,7 +5,7 @@ import os
 import httpx
 from fastapi import FastAPI, HTTPException
 
-from backend.config import settings
+from backend.bootstrap.settings import settings
 
 if settings().environment == "production":
     raise RuntimeError("示例宿主不得在生产环境启用")

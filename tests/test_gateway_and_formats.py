@@ -7,9 +7,9 @@ import pytest
 from docx import Document
 from pypdf import PdfWriter
 
-from backend.config import Settings
-from backend.infra.gateway import Gateway
-from backend.services.knowledge import extract, split_sections
+from backend.bootstrap.settings import Settings
+from backend.infrastructure.models.gateway import Gateway
+from backend.capabilities.knowledge import extract, split_sections
 
 
 @pytest.mark.asyncio

@@ -1,7 +1,6 @@
 """架构契约：保证目录迁移形成真实的依赖边界，而不是只更换文件位置。"""
 
 import ast
-import importlib
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -14,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def backend_imports(path):
     """读取语法树中的项目导入；字符串注释和错误消息不算模块依赖。"""
-    for node in ast.walk(ast.parse(path.read_text())):
+    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
         if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith("backend."):
             yield node.module
         elif isinstance(node, ast.Import):
@@ -22,38 +21,38 @@ def backend_imports(path):
 
 
 def test_agent_kernel_has_no_application_or_infrastructure_dependency():
-    """内核不得反向依赖工厂、基础设施或 HTTP；旧根级转发文件不属于内核实现。"""
-    for path in (ROOT / "backend/agent").glob("*/*.py"):
+    """内核不得反向依赖工厂、基础设施或 HTTP。"""
+    for path in (ROOT / "backend/agent").rglob("*.py"):
         for module in backend_imports(path):
             assert module.startswith("backend.agent."), f"{path}: {module}"
 
 
-def test_canonical_modules_do_not_use_legacy_imports():
-    """新增实现只导入唯一的新路径；兼容层仅供旧调用方和旧测试使用。"""
-    for folder in ["agent", "capabilities", "infrastructure", "applications", "api", "bootstrap"]:
-        for path in (ROOT / "backend" / folder).rglob("*.py"):
-            if folder == "agent" and path.parent == ROOT / "backend/agent":
-                continue
-            for module in backend_imports(path):
-                assert not module.startswith(("backend.infra.", "backend.services.", "backend.core.")), (
-                    path,
-                    module,
-                )
-
-
-@pytest.mark.parametrize(
-    "old,new",
-    [
-        ("backend.infra.db", "backend.infrastructure.persistence.database"),
-        ("backend.infra.models", "backend.infrastructure.persistence.entities"),
-        ("backend.infra.gateway", "backend.infrastructure.models.gateway"),
-        ("backend.services.runtime", "backend.applications.factory_assistant.runtime"),
-        ("backend.services.jobs", "backend.infrastructure.jobs.worker"),
-    ],
+LEGACY_MODULES = (
+    "backend.infra", "backend.services", "backend.core", "backend.config",
+    "backend.agent.assembly", "backend.agent.composition", "backend.agent.knowledge",
+    "backend.agent.data", "backend.agent.dependencies",
 )
-def test_legacy_import_uses_same_module_identity(old, new):
-    """旧路径与新路径必须引用同一模块，防止产生第二份连接池、任务表或模拟替换点。"""
-    assert importlib.import_module(old) is importlib.import_module(new)
+
+
+def is_legacy(module):
+    return any(module == old or module.startswith(old + ".") for old in LEGACY_MODULES)
+
+
+def test_repository_does_not_use_legacy_imports():
+    """检查所有源码入口，包括 from 导入与动态导入、补丁目标字符串。"""
+    for folder in ("backend", "tests", "scripts", "examples", "migrations"):
+        for path in (ROOT / folder).rglob("*.py"):
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                modules = []
+                if isinstance(node, ast.Import):
+                    modules = [alias.name for alias in node.names]
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    modules = [node.module] + [node.module + "." + alias.name for alias in node.names]
+                elif isinstance(node, ast.Call):
+                    modules = [arg.value for arg in node.args if isinstance(arg, ast.Constant) and isinstance(arg.value, str)]
+                for module in modules:
+                    assert not is_legacy(module), f"{path}: {module}"
 
 
 @pytest.mark.asyncio

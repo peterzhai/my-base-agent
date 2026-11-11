@@ -7,7 +7,9 @@ import asyncio
 
 from pydantic import BaseModel
 
-from backend.core.contracts import ExecutionContext, Principal, Tool, ToolRegistry
+from backend.agent.execution.context import ExecutionContext
+from backend.agent.policies.contracts import Principal
+from backend.agent.tools.registry import Tool, ToolRegistry
 
 
 class AddInput(BaseModel):

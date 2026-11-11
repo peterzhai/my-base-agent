@@ -2,7 +2,7 @@
 
 from alembic import op
 
-import backend.infra.models  # noqa: F401
+import backend.infrastructure.persistence.entities  # noqa: F401
 from backend.infrastructure.persistence.database import Base
 
 revision = "001"
